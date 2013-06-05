@@ -10,47 +10,73 @@ public class Health : MonoBehaviour
     public bool showHealthBar = false;
 
     public FontStyle fontStyle;
-    public GUIStyle healthBarStyle;
-    public GUIStyle healthBarBoxStyle_outer;
-    public GUIStyle healthBarBoxStyle_inner;
-    
+
+    private GUIStyle healthBarStyle;
+    private GUIStyle healthBarBoxStyle_outer = null;
+    private GUIStyle healthBarBoxStyle_inner = null;
+
     private Transform myTransform;
 
     private Rect healthBar;
     private Rect healthBarBox_inner;
     private Rect healthBarBox_outer;
-    
+
     private float healthBarBorder = 1.0f;
 
-    private Texture2D healthTexture; 
     private Texture2D backgroundTexture;
     private Texture2D borderTexture;
 
     private Font font;
 
-    private Texture2D healthFull;
-    private Texture2D healthDepleted;
- 
-    
+
+    // Initializes border and background textures.
     void initTextures()
     {
-        healthTexture = new Texture2D(1, 1);
-        for (int i = 0; i <=  healthTexture.width;i++)
-            for (int j = 0; j <= healthTexture.height; j++)
-                healthTexture.SetPixel(i,j,Color.red);
-        healthTexture.Apply();
-        
+
+
+
         backgroundTexture = new Texture2D(1, 1);
-        for (int i = 0; i <=  backgroundTexture.width;i++)
-            for (int j = 0; j <= backgroundTexture.height; j++)
-                backgroundTexture.SetPixel(i,j,Color.cyan);
+//        for (int i = 0; i <=  backgroundTexture.width;i++)
+//            for (int j = 0; j <= backgroundTexture.height; j++)
+                backgroundTexture.SetPixel(0,0,Color.cyan);
         backgroundTexture.Apply();
-        
+
         borderTexture = new Texture2D(1, 1);
-        for (int i = 0; i <=  borderTexture.width;i++)
-            for (int j = 0; j <= borderTexture.height; j++)
-                borderTexture.SetPixel(i,j,Color.black);
+//        for (int i = 0; i <=  borderTexture.width;i++)
+//            for (int j = 0; j <= borderTexture.height; j++)
+                borderTexture.SetPixel(0,0,Color.black);
         borderTexture.Apply();
+    }
+
+    Texture2D healthTexture()
+    {
+        Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+        float healthPercentage = ((float)curHealth+maxHealth/5)/((float)maxHealth+maxHealth/5);
+        if (healthPercentage < 0.2)
+            healthPercentage -= 0.1f;
+        if (healthPercentage < 0) 
+            healthPercentage = 0;
+//        else
+//            healthPercentage = 1;
+        tex.SetPixel(0,0,new Color(1-healthPercentage,healthPercentage,0));
+
+//        for (int i = 0; i <=  tex.width;i++)
+//        {
+//            for (int j = 0; j <= tex.height; j++)
+//            {
+//                //tex.SetPixel(i,j,new Color((1-healthPercentage)*255 ,healthPercentage*255,0));
+//                tex.SetPixel(i,j,new Color(0,healthPercentage*255,0));
+//                //tex.SetPixel(i,j,new Color(150,105,0f));
+//            }
+//        }
+        tex.Apply();
+        if (tag == "Enemy")
+        {
+            Debug.Log("HealthPercentage: " + healthPercentage);
+            //Debug.Log("New Health Color: rgb("+ (1-healthPercentage)*255 +","+healthPercentage*255+","+0+")");
+        }
+        ;
+        return tex;
     }
 
     // Use this for initialization
@@ -70,14 +96,10 @@ public class Health : MonoBehaviour
         int width = Screen.width/2;
         healthBar = new Rect(10, 0,width, 20);
 
-       
-        
-        healthBarStyle.normal.background = healthTexture;
-        
-        healthBarBoxStyle_outer.normal.background = borderTexture;
-        healthBarBoxStyle_inner.normal.background = backgroundTexture;
-        healthBarBoxStyle_outer.stretchWidth = false;
-        healthBarBoxStyle_inner.stretchWidth = false;
+
+
+
+
 
 
 
@@ -97,18 +119,11 @@ public class Health : MonoBehaviour
         }
         healthBarBox_inner = new Rect(healthBar.x, healthBar.y, healthBar.width, healthBar.height);
         healthBarBox_outer = new Rect(healthBar.x-healthBarBorder, healthBar.y-healthBarBorder, healthBar.width+2*healthBarBorder, healthBar.height+2*healthBarBorder);
-        
-        //healthBarBoxBigger = new Rect(healthBar.x-5,healthBar.y-5, healthBar.width+10, healthBar.height+10);
-
-
-
-
-//        healthBarBoxStyle.fixedWidth = this.width;
-//        healthBarBoxStyle.fixedHeight = healthBarBox.height;
-//        healthBarBoxStyle.stretchWidth = false;
-//
 
     }
+
+
+
 
     // Update is called once per frame
     void Update ()
@@ -116,22 +131,48 @@ public class Health : MonoBehaviour
         AdjustCurrentHealth (0);
     }
 
+
+    void createStyles()
+    {
+        if (healthBarBoxStyle_inner == null)
+        {
+            healthBarBoxStyle_inner = new GUIStyle();
+            healthBarBoxStyle_outer = new GUIStyle();
+            healthBarBoxStyle_outer.normal.background = borderTexture;
+            healthBarBoxStyle_inner.normal.background = backgroundTexture;
+            healthBarBoxStyle_outer.stretchWidth = false;
+            healthBarBoxStyle_inner.stretchWidth = false;
+            healthBarBoxStyle_inner.normal.textColor = Color.gray;
+            
+            healthBarStyle = new GUIStyle(GUI.skin.box);
+            healthBarStyle.fixedHeight=0;
+            healthBarStyle.fixedWidth = 0;
+            healthBarStyle.stretchWidth = false;
+            healthBarStyle.normal.textColor = Color.black;
+            
+        }
+        healthBarStyle.normal.background = healthTexture();
+    }
+
     void OnGUI ()
     {
+
 
         //GUI.skin.box.fontStyle = fontStyle;
 
         if(showHealthBar)
         {
+             createStyles();
             //GUI.skin.box.stretchWidth = false;
-            
+
             //GUI.Box(healthBarBox,"");
             //GUI.DrawTexture(healthBar, redTexture);
             GUI.Box(healthBarBox_outer,"",healthBarBoxStyle_outer);
             GUI.Box(healthBarBox_inner,"",healthBarBoxStyle_inner);
+            GUI.Box(healthBar,"", healthBarStyle);
+            GUI.Box(healthBarBox_inner,myTransform.name + " = " + curHealth + "/" + maxHealth,healthBarStyle);
             
-            GUI.Box(healthBar, myTransform.name + " = " + curHealth + "/" + maxHealth, healthBarStyle);
-            
+
             //GUI.Box(healthBarBoxBigger,"",healthBarBoxStyle2);
         }
 
