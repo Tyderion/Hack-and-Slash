@@ -41,43 +41,29 @@ public class Health : MonoBehaviour
     private Texture2D clearTexture;
 
     private Font font;
+    
+    private bool firstrun = true;
 
 
     // Initializes border and background textures.
     private void initTextures()
     {
-
-
-
-        backgroundTexture = new Texture2D(1, 1);
-        backgroundTexture.SetPixel(0,0,Color.cyan);
-        backgroundTexture.Apply();
-
-        borderTexture = new Texture2D(1, 1);
-        borderTexture.SetPixel(0,0,Color.black);
-        borderTexture.Apply();
-
-
-        clearTexture = new Texture2D(1, 1);
-        clearTexture.SetPixel(0,0,Color.clear);
-        clearTexture.Apply();
+        backgroundTexture = ColoredTexture.generatePixel(g: 255, b: 255);
+        borderTexture = ColoredTexture.generatePixel();
+        clearTexture = ColoredTexture.generatePixel(a: 0);
     }
  
     // Returns a Texture with a color based on the current Health of the entity.
-    private Texture2D healthTexture()
+    Texture2D healthTexture()
     {
-        Texture2D tex = new Texture2D(1, 1, TextureFormat.ARGB32, false);
-        float healthPercentage = ((float)curHealth5)/((float)maxHealth);
+        
+        float healthPercentage = ((float)curHealth)/((float)maxHealth);
         // Reach 0 a bit faster than standard
         if (healthPercentage < 0.2)
             healthPercentage -= 0.1f;
         if (healthPercentage < 0)
             healthPercentage = 0;
-
-        tex.SetPixel(0,0,new Color(1-healthPercentage,healthPercentage,0));
-
-        tex.Apply();
-        return tex;
+        return ColoredTexture.generatePixel( r: 1-healthPercentage, g: healthPercentage ,b: 0);
     }
  
     // Creates the styles we need
@@ -108,7 +94,6 @@ public class Health : MonoBehaviour
     void Start ()
     {
         initTextures();
-        createStyles();
        myTransform = transform;
 
         fontStyle = FontStyle.Normal;
@@ -145,6 +130,7 @@ public class Health : MonoBehaviour
 
     void updateStyles()
     {
+        //healthBarStyle.normal.background = ColoredTextureGenerator.generatePixel( r: 1-healthPercentage, g: healthPercentage ,b: 0);
         healthBarStyle.normal.background = healthTexture();
     }
 
@@ -152,16 +138,19 @@ public class Health : MonoBehaviour
     void OnGUI ()
     {
 
-
+        if (firstrun)
+        {
+            firstrun = false;
+            createStyles();
+        }
         //GUI.skin.box.fontStyle = fontStyle;
 
         if(showHealthBar)
         {
              updateStyles();
-            //GUI.skin.box.stretchWidth = false;
+//            float healthPercentage = ((float)curHealth)/((float)maxHealth);
+//           
 
-            //GUI.Box(healthBarBox,"");
-            //GUI.DrawTexture(healthBar, redTexture);
             GUI.Box(healthBarBox_outer,"",healthBarBoxStyle_outer);
             GUI.Box(healthBarBox_inner,"",healthBarBoxStyle_inner);
             GUI.Box(healthBar,"", healthBarStyle);
