@@ -12,6 +12,7 @@ public class Health : MonoBehaviour
     public FontStyle fontStyle;
 
     private GUIStyle healthBarStyle;
+     private GUIStyle healthBarStyleText;
     private GUIStyle healthBarBoxStyle_outer = null;
     private GUIStyle healthBarBoxStyle_inner = null;
 
@@ -25,6 +26,7 @@ public class Health : MonoBehaviour
 
     private Texture2D backgroundTexture;
     private Texture2D borderTexture;
+    private Texture2D clearTexture;
 
     private Font font;
 
@@ -36,16 +38,17 @@ public class Health : MonoBehaviour
 
 
         backgroundTexture = new Texture2D(1, 1);
-//        for (int i = 0; i <=  backgroundTexture.width;i++)
-//            for (int j = 0; j <= backgroundTexture.height; j++)
-                backgroundTexture.SetPixel(0,0,Color.cyan);
+        backgroundTexture.SetPixel(0,0,Color.cyan);
         backgroundTexture.Apply();
 
         borderTexture = new Texture2D(1, 1);
-//        for (int i = 0; i <=  borderTexture.width;i++)
-//            for (int j = 0; j <= borderTexture.height; j++)
-                borderTexture.SetPixel(0,0,Color.black);
+        borderTexture.SetPixel(0,0,Color.black);
         borderTexture.Apply();
+        
+        
+        clearTexture = new Texture2D(1, 1);
+        clearTexture.SetPixel(0,0,Color.clear);
+        clearTexture.Apply();
     }
 
     Texture2D healthTexture()
@@ -147,8 +150,12 @@ public class Health : MonoBehaviour
             healthBarStyle = new GUIStyle(GUI.skin.box);
             healthBarStyle.fixedHeight=0;
             healthBarStyle.fixedWidth = 0;
-            healthBarStyle.stretchWidth = false;
+            
             healthBarStyle.normal.textColor = Color.black;
+            
+            healthBarStyleText = new GUIStyle(healthBarStyle);
+            healthBarStyleText.stretchWidth = false;
+            healthBarStyleText.normal.background = clearTexture;
             
         }
         healthBarStyle.normal.background = healthTexture();
@@ -170,7 +177,7 @@ public class Health : MonoBehaviour
             GUI.Box(healthBarBox_outer,"",healthBarBoxStyle_outer);
             GUI.Box(healthBarBox_inner,"",healthBarBoxStyle_inner);
             GUI.Box(healthBar,"", healthBarStyle);
-            GUI.Box(healthBarBox_inner,myTransform.name + " = " + curHealth + "/" + maxHealth,healthBarStyle);
+            GUI.Box(healthBarBox_inner,myTransform.name + " = " + curHealth + "/" + maxHealth,healthBarStyleText);
             
 
             //GUI.Box(healthBarBoxBigger,"",healthBarBoxStyle2);
